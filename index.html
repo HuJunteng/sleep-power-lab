@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080d18">
+<title>睡眠算力实验室 · Brain Power Test</title>
+<style>
+:root{color-scheme:dark;--bg:#080d18;--panel:#101a2b;--line:#24344e;--cyan:#5ee7ff;--green:#a3ffbf;--muted:#91a4bf;--pink:#ff8ccf}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#18385b 0%,transparent 55%),var(--bg);color:#eaf3ff;font-family:ui-monospace,SFMono-Regular,Consolas,"Microsoft YaHei",monospace;display:flex;align-items:center;justify-content:center;padding:24px}
+.shell{width:min(850px,100%);border:1px solid #29415f;border-radius:18px;overflow:hidden;background:rgba(10,18,32,.96);box-shadow:0 24px 90px #0009}
+.top{display:flex;align-items:center;gap:9px;padding:14px 18px;background:#111d30;border-bottom:1px solid var(--line)}
+.dot{width:10px;height:10px;border-radius:50%}.red{background:#ff6b6b}.yellow{background:#ffd166}.green{background:#65e6a5}
+.top-title{margin-left:8px;color:#b6c9e4;font-size:12px;letter-spacing:1px}
+.status{margin-left:auto;color:var(--green);font-size:11px}
+main{padding:clamp(20px,5vw,42px)}
+.kicker{color:var(--cyan);font-size:11px;letter-spacing:3px}
+h1{font-size:clamp(26px,5vw,42px);line-height:1.2;margin:12px 0 8px}
+h1 span{color:var(--cyan)}
+.sub{color:var(--muted);font-size:13px;line-height:1.8;margin:0 0 28px}
+.screen{min-height:270px;border:1px solid var(--line);border-radius:12px;background:#070c14;padding:20px;position:relative}
+.screen-label{font-size:10px;color:#647b9b;letter-spacing:2px;margin-bottom:18px}
+.line{color:#b8cbe5;font-size:13px;line-height:1.9;white-space:pre-wrap}
+.prompt{color:var(--green)}
+.input-row{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+input{width:min(230px,100%);background:#0d1726;border:1px solid #355273;border-radius:8px;padding:13px 14px;color:#fff;font:inherit;outline:none}
+input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #5ee7ff1a}
+button{border:0;border-radius:8px;padding:13px 18px;background:linear-gradient(135deg,#4ddcf5,#66f0b0);color:#07111d;font:700 13px inherit;cursor:pointer;transition:.18s}
+button:hover{transform:translateY(-1px);filter:brightness(1.08)}
+button:focus-visible{outline:2px solid white;outline-offset:3px}
+.secondary{background:#17263b;color:#c8d9ef;border:1px solid #304865}
+.result{display:none;margin-top:22px;border:1px solid #31506d;background:linear-gradient(135deg,#10243a,#101a2b);border-radius:12px;padding:20px}
+.result.show{display:block;animation:rise .25s ease}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.result-tag{font-size:10px;color:var(--cyan);letter-spacing:2px}
+.result h2{font-size:clamp(21px,4vw,30px);margin:12px 0;color:var(--green)}
+.result p{font-size:12px;color:var(--muted);line-height:1.8;margin:0}
+.meter{height:7px;background:#1c2c42;border-radius:20px;margin:18px 0 8px;overflow:hidden}
+.meter>div{height:100%;width:0;background:linear-gradient(90deg,#5ee7ff,#a3ffbf);transition:width .5s}
+.meta{display:flex;justify-content:space-between;color:#8298b5;font-size:10px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.history{margin-top:24px;border-top:1px solid var(--line);padding-top:18px}
+.history-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.history-head strong{font-size:12px;color:#b9cce5}
+.history-head button{padding:7px 10px;font-size:10px}
+#historyList{display:flex;gap:8px;flex-wrap:wrap}
+.chip{font-size:10px;color:#a8bdd8;background:#111e30;border:1px solid #253a55;padding:7px 9px;border-radius:7px}
+.footer{margin-top:22px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:#657b99;font-size:10px;line-height:1.7}
+.blink{animation:blink 1s steps(2,start) infinite}@keyframes blink{to{visibility:hidden}}
+@media(max-width:520px){body{padding:10px}.top{padding:12px}main{padding:20px 16px}.screen{padding:15px}.input-row>*{width:100%}.actions button{flex:1}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top">
+    <i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i>
+    <div class="top-title">BRAIN_POWER_TERMINAL.exe</div>
+    <div class="status">● SYSTEM ONLINE</div>
+  </div>
+  <main>
+    <div class="kicker">SLEEP LAB / EXPERIMENT 001</div>
+    <h1>睡眠算力<span>实验室</span></h1>
+    <p class="sub">输入昨晚的睡眠时长，启动大脑算力检测。<br>本实验结果纯属娱乐，请勿作为健康建议。</p>
+
+    <section class="screen" aria-label="测试终端">
+      <div class="screen-label">TERMINAL // READY</div>
+      <div class="line">正在连接大脑服务器…… <span class="prompt">完成</span></div>
+      <div class="line">加载算力评估模块…… <span class="prompt">完成</span></div>
+      <div class="line">等待用户输入睡眠时长。</div>
+      <div class="input-row">
+        <label class="prompt" for="hours">&gt; 睡眠小时数：</label>
+        <input id="hours" type="number" min="0" max="24" step="1" placeholder="例如：8" inputmode="numeric">
+        <button id="run">启动检测 ↗</button>
+      </div>
+      <div class="line" id="error" role="alert" style="color:#ff8c9c;margin-top:10px"></div>
+      <div class="result" id="result" aria-live="polite">
+        <div class="result-tag">ANALYSIS COMPLETE // 检测完成</div>
+        <h2 id="verdict"></h2>
+        <p id="detail"></p>
+        <div class="meter"><div id="meterFill"></div></div>
+        <div class="meta"><span>脑力加载指数（娱乐版）</span><span id="score"></span></div>
+        <div class="actions">
+          <button id="again">再测一次</button>
+          <button class="secondary" id="copy">复制测试结果</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="history">
+      <div class="history-head"><strong>SESSION LOG / 本次访问记录</strong><button class="secondary" id="clear">清空记录</button></div>
+      <div id="historyList"><span class="chip">暂无测试记录</span></div>
+    </section>
+    <div class="footer">
+      <span>BUILD 1.0.0 · MADE WITH CREATIVITY</span>
+      <span>友情提示：睡眠充足比算力段位更重要 :)</span>
+    </div>
+  </main>
+</div>
+<script>
+const input=document.querySelector('#hours');
+const run=document.querySelector('#run');
+const result=document.querySelector('#result');
+const error=document.querySelector('#error');
+const historyList=document.querySelector('#historyList');
+let latest='';
+const levels=[
+  {text:'今天你的大脑免费了',detail:'检测到的算力几乎为零。建议先补觉，再来挑战世界。',score:0},
+  {text:'猜猜你明天还能不能醒过来',detail:'系统发出强烈警告：你可能正在用意志力强行开机。',score:20},
+  {text:'今天你的大脑算力约等于一个土豆',detail:'土豆表示：这局我熟。建议暂时不要进行高难度脑力运算。',score:40},
+  {text:'今天你的大脑算力约等于豆包',detail:'已经具备基础对话能力，偶尔可能需要重启一下。',score:60},
+  {text:'今天你的大脑算力约等于大肥鱼',detail:'状态看起来不错，思路开始活跃，继续保持。',score:80},
+  {text:'今天你的大脑算力约等于 ChatGPT',detail:'恭喜解锁高算力模式！请合理使用你的超强脑力。',score:100},
+  {text:'今天你已经睡成猪了',detail:'睡眠时长突破本测试的段位上限。恭喜进入传说中的猪猪模式。',score:100}
+];
+function test(){
+  const raw=input.value;
+  const hours=Number(raw);
+  error.textContent='';
+  if(raw.trim()===''||!Number.isInteger(hours)||hours<0||hours>24){
+    error.textContent='输入无效：请输入 0 到 24 之间的整数。';
+    result.classList.remove('show');input.focus();return;
+  }
+  const level=Math.floor(hours/2);
+  const item=levels[Math.min(level,6)];
+  document.querySelector('#verdict').textContent=item.text;
+  document.querySelector('#detail').textContent=`你输入了 ${hours} 小时睡眠。${item.detail}`;
+  document.querySelector('#score').textContent=item.score+'/100';
+  document.querySelector('#meterFill').style.width=item.score+'%';
+  result.classList.add('show');
+  latest=`睡眠算力实验室测试结果\n睡眠时长：${hours} 小时\n检测结果：${item.text}\n脑力加载指数（娱乐版）：${item.score}/100\n（纯属娱乐，不构成健康建议）`;
+  const chip=document.createElement('span');chip.className='chip';chip.textContent=`${hours}h → ${item.text}`;
+  if(historyList.querySelector('.chip')&&historyList.querySelector('.chip').textContent==='暂无测试记录')historyList.innerHTML='';
+  historyList.prepend(chip);
+}
+run.addEventListener('click',test);
+input.addEventListener('keydown',e=>{if(e.key==='Enter')test()});
+document.querySelector('#again').addEventListener('click',()=>{result.classList.remove('show');input.value='';error.textContent='';input.focus()});
+document.querySelector('#copy').addEventListener('click',async()=>{
+  if(!latest)return;
+  const btn=document.querySelector('#copy');
+  try{await navigator.clipboard.writeText(latest);btn.textContent='已复制 ✓';}
+  catch(e){btn.textContent='复制失败，请手动复制';}
+  setTimeout(()=>btn.textContent='复制测试结果',1800);
+});
+document.querySelector('#clear').addEventListener('click',()=>{historyList.innerHTML='<span class="chip">暂无测试记录</span>'});
+</script>
+</body>
+</html>
